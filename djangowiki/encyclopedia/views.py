@@ -15,13 +15,13 @@ def display(request, title):
     # Check if page exists / validate input
     if not util.get_entry(title):
         # Placeholder return value.  
-        return HttpResponse("This is a placeholder error")
+        return render(request, 'encyclopedia/error.html', {"title": title})
     #Return page
     else:
         page = util.get_entry(title)
         # provide context
 
-        #Convert content from markdown to html
+        # TO DO: Convert content from markdown to html
 
-        #Pass html into render function.
+        # Pass html into render function.
         return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": page})
