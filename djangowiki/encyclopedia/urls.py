@@ -9,6 +9,6 @@ urlpatterns = [
     # <str:title> allows the GET request to match to a path
     path("wiki/<str:title>", views.display, name="display"),
     # Path to process search input
-    path("", views.search, name="search")
+    path("search", views.search, name="search")
 
 ]
