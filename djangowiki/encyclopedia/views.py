@@ -47,6 +47,7 @@ def search(query):
             # Pass html into render function.        
             return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage})
         else:
+            # Placeholder render return
             return render(request, 'encyclopedia/error.html', {"title": title})
             # Return search page with any partial substring matches
 
