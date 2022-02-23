@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django import forms
+import markdown2
+from markdown2 import Markdown
 
 from . import util
 
@@ -18,10 +21,37 @@ def display(request, title):
         return render(request, 'encyclopedia/error.html', {"title": title})
     #Return page
     else:
-        page = util.get_entry(title)
-        # provide context
-
-        # TO DO: Convert content from markdown to html
+        markdownpage = util.get_entry(title)
+        # Convert content from markdown to html
+        # Code taken from / based on https://github.com/trentm/python-markdown2
+        markdowner = Markdown()
+        htmlpage = markdowner.convert(markdownpage)
 
         # Pass html into render function.
-        return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": page})
+        return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage})
+
+def search(query):
+
+    # Take search input and either return page, or possibly related results based on substring.
+    if request.method == POST:
+        # Create a form instance and pass data into it
+        # Based on https://docs.djangoproject.com/en/4.0/topics/forms/
+        form = searchform(request.post)
+        
+        # Check for a direct match for search value
+        if util.get_entry(form):
+            # If found, return relevant page
+            markdownpage = util.get_entry(query)
+            markdowner = Markdown()
+            htmlpage = markdowner.convert(markdownpage)   
+            # Pass html into render function.        
+            return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage})
+        else:
+            return render(request, 'encyclopedia/error.html', {"title": title})
+            # Return search page with any partial substring matches
+
+
+
+# Following classes based on https://docs.djangoproject.com/en/4.0/topics/forms/
+class searchform(forms.Form):
+    query = forms.CharField(label='Search', max_length=100)
