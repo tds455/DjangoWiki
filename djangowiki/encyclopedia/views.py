@@ -16,8 +16,9 @@ def index(request):
 def display(request, title):
     # Check if page exists / validate input
     if not util.get_entry(title):
-        # Placeholder return value.  
-        return render(request, 'encyclopedia/error.html', {"title": title})
+        # Return error page and reset form
+        form = searchform()
+        return render(request, 'encyclopedia/error.html', {"title": title, 'form': form})
     #Return page
     else:
         markdownpage = util.get_entry(title)
@@ -36,8 +37,8 @@ def search(request):
         # Based on https://docs.djangoproject.com/en/4.0/topics/forms/
         form = searchform(request.POST)
         if form.is_valid():
-            # Validate input and strip relevant data
-            form = form.cleaned_data["search"]
+            # Validate input and strip relevant data.  Convert to lowercase to allow for matching substrings to titles.
+            form = form.cleaned_data["search"].lower()
 
             if not form.isalpha():
                 form = searchform()
@@ -54,8 +55,31 @@ def search(request):
                 return render(request, 'encyclopedia/page.html', {"title": form, "pagebody": htmlpage})
 
             else:
-                # Check to see if query is present as a substring 
-                 return render(request, 'encyclopedia/error.html', {"title": form})
+                # Get list of all entries
+                entries = util.list_entries()
+
+                # Check to see if query is present as a substring and return as a list.  Convert results to lowercase to allow matching substrings to titles.
+
+                # sample code from util.py
+                # for filename in filenames if filename.endswith(".md")))
+                query = []
+                for filename in entries:
+                    if form in filename.lower():
+                        query.append(filename)
+
+                # Debugging value
+                print(query)
+
+                # Return list of search results.  Reset form.
+                form = searchform()
+
+                # If results found, return list of results
+                if len(query) > 0:
+                    return render(request, 'encyclopedia/search.html', {"entries": query, 'form': form})
+                
+                if len(query) is 0:
+                    query = "No results found"
+                    return render(request, 'encyclopedia/search.html', {"feedback": query, 'form': form}) 
 
         else:
             # If form input cannot be validated, return to index page
