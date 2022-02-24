@@ -14,28 +14,34 @@ def index(request):
 # Display the requested page
 # ref: https://docs.djangoproject.com/en/4.0/intro/tutorial03/
 def display(request, title):
+
     # Check if page exists / validate input
     if not util.get_entry(title):
+
         # Return error page and reset form
         form = searchform()
         return render(request, 'encyclopedia/error.html', {"title": title, 'form': form})
-    #Return page
+
     else:
         markdownpage = util.get_entry(title)
+
         # Convert content from markdown to html
         # Code taken from / based on https://github.com/trentm/python-markdown2
         markdowner = Markdown()
         htmlpage = markdowner.convert(markdownpage)
         form = searchform()
+
         # Pass html into render function.
         return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage, 'form': form})
 
 def search(request):
     # Take search input and either return page, or possibly related results based on substring.
     if request.method == "POST":
+
         # Create a form instance and pass data into it
         # Based on https://docs.djangoproject.com/en/4.0/topics/forms/
         form = searchform(request.POST)
+
         if form.is_valid():
             # Validate input and strip relevant data.  Convert to lowercase to allow for matching substrings to titles.
             form = form.cleaned_data["search"].lower()
@@ -91,9 +97,57 @@ def search(request):
         form = searchform()
         return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), 'form': form})
 
+def create(request):
+    if request.method == "POST":
+        # If method is POST, process input.
+        form = createform(request.POST)
+        if form.is_valid():
+
+            # Validate input and strip relevant data.
+            title = form.cleaned_data["title"]
+            body = form.cleaned_data["create"]
+            # If page already exists, return error.
+            if util.get_entry(title):
+                form = searchform()
+                error = "Page already exists!"
+                return render(request, 'encyclopedia/error.html', {'form': form, 'error': error})
+            else:
+                # Otherwise, create new page
+                util.save_entry(title,body)
+                
+                # Display new page
+                # Convert content from markdown to html
+                # Code taken from / based on https://github.com/trentm/python-markdown2
+                markdownpage = util.get_entry(title)
+                markdowner = Markdown()
+                htmlpage = markdowner.convert(markdownpage)
+                form = searchform()
+
+                # Pass html into render function.
+                return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage, 'form': form})
+            
+    else:
+        # If method is GET, return form.
+        newform = createform()
+        form = searchform()
+        return render(request, "encyclopedia/create.html", {'form': form, 'createform': newform})
+
+def edit(request):
+    return None
+
+
+
+
 
 
 # Following classes based on https://docs.djangoproject.com/en/4.0/topics/forms/
 class searchform(forms.Form):
     search = forms.CharField(label='search', max_length=100)
+
+class createform(forms.Form):
+    title = forms.CharField(label='title', max_length=50, widget = forms.TextInput(attrs={'class':'col-sm-12'}))
+    # Based on http://www.learningaboutelectronics.com/Articles/How-to-create-a-text-area-in-a-Django-form.php
+    create = forms.CharField(label='body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
+
+
     
