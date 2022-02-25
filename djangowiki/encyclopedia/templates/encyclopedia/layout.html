@@ -12,7 +12,7 @@
         <div class="row">
             <div class="sidebar col-lg-2 col-md-3">
                 <h2>Wiki</h2>
-                <form method="post" action="/search" class="search"> 
+                <form method="post" action="{% url 'search' %}" class="search"> 
                     {% csrf_token %}
                     {{ form }}
                     <!-- <input class="search" type="text" name="Search" placeholder="Search Encyclopedia" label="Search"> -->
@@ -24,7 +24,7 @@
                     <a href="{% url 'create' %}">Create New Page</a>
                 </div>
                 <div>
-                    Random Page
+                    <a href="{% url 'random' %}">Random Page</a>
                 </div>
                 {% block nav %}
                 {% endblock %}

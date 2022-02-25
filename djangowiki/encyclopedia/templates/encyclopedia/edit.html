@@ -1,0 +1,21 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block header %}
+<h1> Edit </h1>
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+
+{% block body %}
+
+<div>
+    <form action="{% url 'edit' %}" method="post">
+    {% csrf_token %}
+    {{editform | safe}}    
+    <input type="submit" value="submit">
+    </form>
+</div>
+
+{% endblock %}

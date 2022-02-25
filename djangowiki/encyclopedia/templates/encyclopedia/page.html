@@ -6,7 +6,7 @@
 
 {% block nav %}
 <div>
-    <a href="{% url 'edit' %}">Edit Page</a>
+
 </div>
 {% endblock %}
 
@@ -14,7 +14,12 @@
 {% block body %}
 
 <div>
-    {{ pagebody | safe }}    
+    {{ pagebody | safe }}   
+        <!-- Pass the title value through while retaining the original formatting and design -->
+        <form action="{% url 'edit' %}" method ='POST'>
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg" name="title" value="{{title}}"> edit </button>
+        </form>
 </div>
 
 {% endblock %}

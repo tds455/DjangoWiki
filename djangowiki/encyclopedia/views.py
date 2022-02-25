@@ -1,14 +1,22 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django import forms
+import random
+from random import randrange
 import markdown2
 from markdown2 import Markdown
 
 from . import util
 
 
+random.seed()
+
 def index(request):
+    # Return main page
+
+    #Initialise search field
     form = searchform()
+
     return render(request, 'encyclopedia/index.html', {'entries': util.list_entries(), 'form': form})
 
 # Display the requested page
@@ -133,25 +141,53 @@ def create(request):
         form = searchform()
         return render(request, 'encyclopedia/create.html', {'form': form, 'createform': newform})
 
-def edit(request, title):
-    # Check if page exists, returns error if it does not
-    if not util.get_entry(title):
+def edit(request):
+    # Check if user has already submitted an edit request
+    form = editform(request.POST)
+    if form.is_valid():
+            title = form.cleaned_data['titlefield']
+            body = form.cleaned_data['editfield']
+            util.save_entry(title,body)
+            markdownpage = util.get_entry(title)
+            markdowner = Markdown()
+            htmlpage = markdowner.convert(markdownpage)
+            form = searchform()
+            return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
 
-        # Return error page
-        form = searchform()
-        error = 'Page does not exist'
-        return render(request, 'encyclopedia/error.html', {'title': title, 'form': form, 'error': error})
-    
+
+    # Otherwise, present edit form for page navigated to /edit from
     else:
-        # Return editform and fill with appropiate .md file.
-        # https://docs.djangoproject.com/en/4.0/ref/forms/fields/ - Field.initial
-        markdownpage = util.get_entry(title)
-        return render(request, 'encyclopedia/edit.html')
+        # Retrieve title of page user visited edit from
+        title = request.POST['title']
 
+        # Check if page exists, returns error if it does not
+        if not util.get_entry(title):
 
-    return None
+            # Return error page
+            form = searchform()
+            error = 'Page does not exist'
+            return render(request, 'encyclopedia/error.html', {'title': title, 'form': form, 'error': error})
+        
+        else:
+            # Return editform and fill with appropiate .md file.
+            # https://docs.djangoproject.com/en/4.0/ref/forms/fields/ - Field.initial
+            editdata = editform(initial={'editfield': util.get_entry(title), 'titlefield': title})
+            form = searchform()
+            return render(request, 'encyclopedia/edit.html',  {'title': title, 'form': form, 'editform': editdata})
 
+def random(request):
+    # Create a list of all current entries
+    randomlist = util.list_entries()
+    # Get a random numerical value, use it to index the list of titles then call get_entrty using that title
+    title = randomlist[randrange(0, (len(randomlist) - 1))]
+    page = util.get_entry(title)
+    # Convert content from markdown to html
+    markdowner = Markdown()
+    htmlpage = markdowner.convert(page)
+    form = searchform()
 
+    # Pass html into render function.
+    return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
 
 
 
@@ -167,5 +203,5 @@ class createform(forms.Form):
 
 # Create a form which Django can populate from the appropiate .md file, then allow the updated info to replace the original .md
 class editform(forms.Form):
-    # https://docs.djangoproject.com/en/4.0/ref/forms/fields/ - Field.initial
-    editfield = forms.CharField(label='edit', widget=forms.Textarea(attrs={'class':'col-sm-12'}, initial='markdown'))
+    titlefield = forms.CharField(label='Title', max_length=50, widget=forms.Textarea(attrs={'class':'col-sm-12 form-control'}))
+    editfield = forms.CharField(label='Body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
