@@ -20,7 +20,8 @@ def display(request, title):
 
         # Return error page and reset form
         form = searchform()
-        return render(request, 'encyclopedia/error.html', {"title": title, 'form': form})
+        error = "Page does not exist"
+        return render(request, 'encyclopedia/error.html', {"title": title, 'form': form, 'error': error})
 
     else:
         markdownpage = util.get_entry(title)
@@ -132,7 +133,9 @@ def create(request):
         form = searchform()
         return render(request, "encyclopedia/create.html", {'form': form, 'createform': newform})
 
-def edit(request):
+def edit(request, title):
+
+
     return None
 
 
@@ -149,5 +152,6 @@ class createform(forms.Form):
     # Based on http://www.learningaboutelectronics.com/Articles/How-to-create-a-text-area-in-a-Django-form.php
     create = forms.CharField(label='body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
 
-
-    
+# Create a form which Django can populate from the appropiate .md file, then allow the updated info to replace the original .md
+class editform(forms.Form):
+    editfield = forms.CharField(label='edit', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
