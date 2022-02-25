@@ -2,7 +2,7 @@
  
 DjangoWiki is Project 1 of CS50W.
 
-I was tasked with expanding upon basic distribution code to meet the following specification.
+I was tasked with meeting the following specification to create a functional wiki using Django.
 
 ## Specification
 Complete the implementation of your Wiki encyclopedia. You must fulfill the following requirements:
