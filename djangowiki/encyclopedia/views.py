@@ -9,7 +9,7 @@ from . import util
 
 def index(request):
     form = searchform()
-    return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), 'form': form})
+    return render(request, 'encyclopedia/index.html', {'entries': util.list_entries(), 'form': form})
 
 # Display the requested page
 # ref: https://docs.djangoproject.com/en/4.0/intro/tutorial03/
@@ -20,8 +20,8 @@ def display(request, title):
 
         # Return error page and reset form
         form = searchform()
-        error = "Page does not exist"
-        return render(request, 'encyclopedia/error.html', {"title": title, 'form': form, 'error': error})
+        error = 'Page does not exist'
+        return render(request, 'encyclopedia/error.html', {'title': title, 'form': form, 'error': error})
 
     else:
         markdownpage = util.get_entry(title)
@@ -33,11 +33,11 @@ def display(request, title):
         form = searchform()
 
         # Pass html into render function.
-        return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage, 'form': form})
+        return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
 
 def search(request):
     # Take search input and either return page, or possibly related results based on substring.
-    if request.method == "POST":
+    if request.method == 'POST':
 
         # Create a form instance and pass data into it
         # Based on https://docs.djangoproject.com/en/4.0/topics/forms/
@@ -45,11 +45,11 @@ def search(request):
 
         if form.is_valid():
             # Validate input and strip relevant data.  Convert to lowercase to allow for matching substrings to titles.
-            form = form.cleaned_data["search"].lower()
+            form = form.cleaned_data['search'].lower()
 
             if not form.isalpha():
                 form = searchform()
-                return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), 'form': form})
+                return render(request, 'encyclopedia/index.html', {'entries': util.list_entries(), 'form': form})
 
             # Check for a direct match for search value
             if util.get_entry(form):
@@ -59,7 +59,7 @@ def search(request):
                 htmlpage = markdowner.convert(markdownpage)   
                 
                 # Pass html into render function.        
-                return render(request, 'encyclopedia/page.html', {"title": form, "pagebody": htmlpage})
+                return render(request, 'encyclopedia/page.html', {'title': form, 'pagebody': htmlpage})
 
             else:
                 # Get list of all entries
@@ -68,7 +68,7 @@ def search(request):
                 # Check to see if query is present as a substring and return as a list.  Convert results to lowercase to allow matching substrings to titles.
 
                 # sample code from util.py
-                # for filename in filenames if filename.endswith(".md")))
+                # for filename in filenames if filename.endswith('.md')))
                 query = []
                 for filename in entries:
                     if form in filename.lower():
@@ -82,35 +82,35 @@ def search(request):
 
                 # If results found, return list of results
                 if len(query) > 0:
-                    return render(request, 'encyclopedia/search.html', {"entries": query, 'form': form})
+                    return render(request, 'encyclopedia/search.html', {'entries': query, 'form': form})
                 
                 if len(query) is 0:
-                    query = "No results found"
-                    return render(request, 'encyclopedia/search.html', {"feedback": query, 'form': form}) 
+                    query = 'No results found'
+                    return render(request, 'encyclopedia/search.html', {'feedback': query, 'form': form}) 
 
         else:
             # If form input cannot be validated, return to index page
             form = searchform()
-            return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), 'form': form})
+            return render(request, 'encyclopedia/index.html', {'entries': util.list_entries(), 'form': form})
             
     else: 
         # If someone attempts to navigate to /search directly, display the index page instead.
         form = searchform()
-        return render(request, "encyclopedia/index.html", {"entries": util.list_entries(), 'form': form})
+        return render(request, 'encyclopedia/index.html', {'entries': util.list_entries(), 'form': form})
 
 def create(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         # If method is POST, process input.
         form = createform(request.POST)
         if form.is_valid():
 
             # Validate input and strip relevant data.
-            title = form.cleaned_data["title"]
-            body = form.cleaned_data["create"]
+            title = form.cleaned_data['title']
+            body = form.cleaned_data['create']
             # If page already exists, return error.
             if util.get_entry(title):
                 form = searchform()
-                error = "Page already exists!"
+                error = 'Page already exists!'
                 return render(request, 'encyclopedia/error.html', {'form': form, 'error': error})
             else:
                 # Otherwise, create new page
@@ -125,15 +125,28 @@ def create(request):
                 form = searchform()
 
                 # Pass html into render function.
-                return render(request, 'encyclopedia/page.html', {"title": title, "pagebody": htmlpage, 'form': form})
+                return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
             
     else:
         # If method is GET, return form.
         newform = createform()
         form = searchform()
-        return render(request, "encyclopedia/create.html", {'form': form, 'createform': newform})
+        return render(request, 'encyclopedia/create.html', {'form': form, 'createform': newform})
 
 def edit(request, title):
+    # Check if page exists, returns error if it does not
+    if not util.get_entry(title):
+
+        # Return error page
+        form = searchform()
+        error = 'Page does not exist'
+        return render(request, 'encyclopedia/error.html', {'title': title, 'form': form, 'error': error})
+    
+    else:
+        # Return editform and fill with appropiate .md file.
+        # https://docs.djangoproject.com/en/4.0/ref/forms/fields/ - Field.initial
+        markdownpage = util.get_entry(title)
+        return render(request, 'encyclopedia/edit.html')
 
 
     return None
@@ -154,4 +167,5 @@ class createform(forms.Form):
 
 # Create a form which Django can populate from the appropiate .md file, then allow the updated info to replace the original .md
 class editform(forms.Form):
-    editfield = forms.CharField(label='edit', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
+    # https://docs.djangoproject.com/en/4.0/ref/forms/fields/ - Field.initial
+    editfield = forms.CharField(label='edit', widget=forms.Textarea(attrs={'class':'col-sm-12'}, initial='markdown'))
