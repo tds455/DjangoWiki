@@ -189,9 +189,6 @@ def random(request):
     # Pass html into render function.
     return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
 
-
-
-
 # Following classes based on https://docs.djangoproject.com/en/4.0/topics/forms/
 class searchform(forms.Form):
     search = forms.CharField(label='search', max_length=100)
