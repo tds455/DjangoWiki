@@ -194,11 +194,11 @@ class searchform(forms.Form):
     search = forms.CharField(label='search', max_length=100)
 
 class createform(forms.Form):
-    title = forms.CharField(label='title', max_length=50, widget = forms.TextInput(attrs={'class':'col-sm-12 form-control'}))
+    title = forms.CharField(label='title', max_length=50, widget = forms.TextInput(attrs={'class':'form-control', 'rows':6}))
     # Based on http://www.learningaboutelectronics.com/Articles/How-to-create-a-text-area-in-a-Django-form.php
-    create = forms.CharField(label='body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
+    create = forms.CharField(label='body', widget=forms.Textarea(attrs={'class':'form-control', 'rows':20, 'cols':80}))
 
 # Create a form which Django can populate from the appropiate .md file, then allow the updated info to replace the original .md
 class editform(forms.Form):
-    titlefield = forms.CharField(label='Title', max_length=50, widget=forms.Textarea(attrs={'class':'col-sm-12 form-control'}))
-    editfield = forms.CharField(label='Body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
+    titlefield = forms.CharField(label='Title', max_length=50, widget=forms.Textarea(attrs={'class':'form-control', 'rows':6}))
+    editfield = forms.CharField(label='Body', widget=forms.Textarea(attrs={'class':'form-control', 'rows':20, 'cols':80}))
