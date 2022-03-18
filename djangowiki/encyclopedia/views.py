@@ -32,12 +32,7 @@ def display(request, title):
         return render(request, 'encyclopedia/error.html', {'title': title, 'form': form, 'error': error})
 
     else:
-        markdownpage = util.get_entry(title)
-
-        # Convert content from markdown to html
-        # Code taken from / based on https://github.com/trentm/python-markdown2
-        markdowner = Markdown()
-        htmlpage = markdowner.convert(markdownpage)
+        htmlpage = htmlconvert(util.get_entry(title))
         form = searchform()
 
         # Pass html into render function.
@@ -62,12 +57,10 @@ def search(request):
             # Check for a direct match for search value
             if util.get_entry(form):
                 # If found, return relevant page, converting markdown to html
-                markdownpage = util.get_entry(form)
-                markdowner = Markdown()
-                htmlpage = markdowner.convert(markdownpage)   
-                
+                htmlpage = htmlconvert(util.get_entry(form)) 
+                form = searchform()
                 # Pass html into render function.        
-                return render(request, 'encyclopedia/page.html', {'title': form, 'pagebody': htmlpage})
+                return render(request, 'encyclopedia/page.html', {'title': form, 'pagebody': htmlpage, 'form': form})
 
             else:
                 # Get list of all entries
@@ -127,9 +120,8 @@ def create(request):
                 # Display new page
                 # Convert content from markdown to html
                 # Code taken from / based on https://github.com/trentm/python-markdown2
-                markdownpage = util.get_entry(title)
-                markdowner = Markdown()
-                htmlpage = markdowner.convert(markdownpage)
+                htmlpage = htmlconvert(util.get_entry(title)) 
+                
                 form = searchform()
 
                 # Pass html into render function.
@@ -148,9 +140,7 @@ def edit(request):
             title = form.cleaned_data['titlefield']
             body = form.cleaned_data['editfield']
             util.save_entry(title,body)
-            markdownpage = util.get_entry(title)
-            markdowner = Markdown()
-            htmlpage = markdowner.convert(markdownpage)
+            htmlpage = htmlconvert(util.get_entry(title)) 
             form = searchform()
             return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
 
@@ -180,14 +170,18 @@ def random(request):
     randomlist = util.list_entries()
     # Get a random numerical value, use it to index the list of titles then call get_entrty using that title
     title = randomlist[randrange(0, (len(randomlist) - 1))]
-    page = util.get_entry(title)
     # Convert content from markdown to html
-    markdowner = Markdown()
-    htmlpage = markdowner.convert(page)
+    htmlpage = htmlconvert(util.get_entry(title))
     form = searchform()
 
     # Pass html into render function.
     return render(request, 'encyclopedia/page.html', {'title': title, 'pagebody': htmlpage, 'form': form})
+
+def htmlconvert(markdowntext):
+    markdowner = Markdown()
+    htmltext = markdowner.convert(markdowntext)
+    return htmltext
+
 
 # Following classes based on https://docs.djangoproject.com/en/4.0/topics/forms/
 class searchform(forms.Form):
