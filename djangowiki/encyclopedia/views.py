@@ -194,7 +194,7 @@ class searchform(forms.Form):
     search = forms.CharField(label='search', max_length=100)
 
 class createform(forms.Form):
-    title = forms.CharField(label='title', max_length=50, widget = forms.TextInput(attrs={'class':'col-sm-12'}))
+    title = forms.CharField(label='title', max_length=50, widget = forms.TextInput(attrs={'class':'col-sm-12 form-control'}))
     # Based on http://www.learningaboutelectronics.com/Articles/How-to-create-a-text-area-in-a-Django-form.php
     create = forms.CharField(label='body', widget=forms.Textarea(attrs={'class':'col-sm-12'}))
 
