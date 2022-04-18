@@ -4,6 +4,20 @@ DjangoWiki is Project 1 of CS50W.
 
 I was tasked with meeting the following specification to create a functional wiki using Django.
 
+## Installation and how to run
+
+- Create virtual environment
+
+        virtualenv env
+
+- Install requirements
+
+        pip install -r requirements.txt
+
+- Start Django server
+
+        python manage.py runserver
+
 ## Specification
 Complete the implementation of your Wiki encyclopedia. You must fulfill the following requirements:
 
