@@ -10,9 +10,9 @@ I was tasked with meeting the following specification to create a functional wik
 
         virtualenv env
 
-- Install requirements
+- Install Django
 
-        pip install -r requirements.txt
+        pip install django
 
 - Start Django server
 
